@@ -9,9 +9,11 @@ El alcance, el modelo de datos, las reglas de negocio y el plan de etapas están
 | Etapa | Descripción | Estado |
 |---|---|---|
 | 1 | Scaffold: Hono + TypeScript + Handlebars + Drizzle/SQLite + Bootstrap local | ✔ Ejecutada |
-| 2–8 | Esquema y seed, registro/login (JWT + Argon2id), RBAC, CRUD de prácticas, pulido UI | Pendiente |
+| 2 | Esquema Drizzle + migraciones + seed de datos base | ✔ Ejecutada |
+| 3 | Registro de usuarios (validación Zod + Argon2id) | ✔ Ejecutada |
+| 4–8 | Login/logout (JWT), RBAC, CRUD de prácticas, pulido UI | Pendiente |
 
-El servidor arranca y sirve la vista base (`GET /`) y un healthcheck (`GET /health`). Aún no existen tablas, autenticación ni CRUD.
+El servidor sirve la vista base (`GET /`), un healthcheck (`GET /health`) y el registro de usuarios (`/auth/registro`). El login con JWT, el RBAC y el CRUD de prácticas corresponden a las etapas 4–7.
 
 ## Stack tecnológico
 
@@ -22,8 +24,8 @@ El servidor arranca y sirve la vista base (`GET /`) y un healthcheck (`GET /heal
 | ORM | Drizzle ORM (`drizzle-orm/better-sqlite3`) |
 | Base de datos | SQLite (`better-sqlite3`), modo WAL |
 | UI | Bootstrap 5, distribuido localmente (sin CDN) |
-| Validación | Zod (se integra en la etapa 3) |
-| Autenticación (planificada) | JWT en cookie httpOnly + Argon2id |
+| Validación | Zod (schemas de entrada) |
+| Autenticación | Argon2id (integrados) · JWT en cookie httpOnly (etapa 4) |
 | Runtime | Node.js ≥ 20, TypeScript estricto, módulos ESM |
 
 ## Requisitos
@@ -58,6 +60,9 @@ Variables de entorno (`.env`):
 | `npm run typecheck` | Verificación de tipos (`tsc --noEmit`) |
 | `npm run build` | Compilación TypeScript a `dist/` |
 | `npm run start` | Ejecutar el build compilado (`node dist/index.js`) |
+| `npm run db:seed` | Regenera los datos base (usuarios demo, empresa y jefe directo) |
+
+Los usuarios demo creados por `npm run db:seed` usan la contraseña `clave1234` y su `password_hash` se genera con Argon2id.
 
 ### Healthcheck
 

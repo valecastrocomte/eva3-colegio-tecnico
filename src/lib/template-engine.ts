@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { TemplateDelegate } from 'handlebars'
 import { viewsDir } from '../config.js'
+Handlebars.registerHelper('eq', (a: unknown, b: unknown) => a === b)
 
 const templateCache = new Map<string, TemplateDelegate>()
 

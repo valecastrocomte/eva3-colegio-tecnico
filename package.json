@@ -1,6 +1,6 @@
 {
   "name": "gestion-practicas-colegio",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -17,11 +17,13 @@
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
+    "argon2": "^0.45.1",
     "better-sqlite3": "^13.0.3",
     "bootstrap": "^5.3.8",
     "drizzle-orm": "^0.45.2",
     "handlebars": "^4.7.9",
-    "hono": "^4.13.7"
+    "hono": "^4.13.7",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^9.6.0",
@@ -34,6 +36,6 @@
     "esbuild@0.18.20": true,
     "esbuild@0.25.12": true,
     "esbuild@0.28.2": true,
-    "better-sqlite3@13.0.3": true
+    "argon2@0.45.1": true
   }
 }

@@ -7,6 +7,7 @@ import { loadConfig, publicDir } from './config.js'
 import { createDb } from './db/index.js'
 import { migrate } from './db/migrate.js'
 import { ensureBootstrapAssets } from './lib/vendor.js'
+import { createAuthRoutes } from './routes/auth.js'
 import { renderer } from './middleware/renderer.js'
 
 function createApp() {
@@ -26,6 +27,8 @@ function createApp() {
       title: 'Gestión de Prácticas Profesionales',
     })
   )
+
+  app.route('/auth', createAuthRoutes(db))
 
   app.get('/health', (c) => {
     try {

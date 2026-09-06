@@ -3,12 +3,10 @@ import { companies, directSupervisors, practices, users } from './schema.js'
 import { createDb } from './index.js'
 import { migrate } from './migrate.js'
 import type { DbClient } from './index.js'
+import { hashPassword } from '../lib/password.js'
 
-/**
- * Placeholder for the Argon2id hash: hashing is introduced in etapa 3
- * (user registration) and this seed value is never a plain-text password.
- */
-const SEED_PASSWORD_HASH = '$argon2id$v=19$dev-seed-placeholder$not-a-real-hash'
+/** Development-only password used for every seeded account. */
+const SEED_PASSWORD = 'clave1234'
 
 const students = [
   { rut: '11.111.111-1', fullName: 'Valentina Rojas Muñoz', career: 'Técnico en Electrónica' },
@@ -20,7 +18,8 @@ const teachers = [
   { rut: '44.444.444-4', fullName: 'Prof. Jorge Araya Campos', specialty: 'Programación' },
 ]
 
-function seed(db: DbClient): void {
+async function seed(db: DbClient): Promise<void> {
+  const passwordHash = await hashPassword(SEED_PASSWORD)
   db.transaction((tx) => {
     tx.delete(practices).run()
     tx.delete(directSupervisors).run()
@@ -47,13 +46,13 @@ function seed(db: DbClient): void {
       .values([
         ...students.map((student) => ({
           ...student,
-          passwordHash: SEED_PASSWORD_HASH,
+          passwordHash,
           role: 'estudiante' as const,
           specialty: null,
         })),
         ...teachers.map((teacher) => ({
           ...teacher,
-          passwordHash: SEED_PASSWORD_HASH,
+          passwordHash,
           role: 'profesor' as const,
           career: null,
         })),
@@ -65,8 +64,9 @@ function seed(db: DbClient): void {
 const config = loadConfig()
 const db = createDb(config.databasePath)
 migrate(db)
-seed(db)
+await seed(db)
 
 console.log(
   `[seed] inserted 2 students, 2 teachers, 1 company and 1 direct supervisor at ${config.databasePath}`
 )
+console.log(`[seed] login password for all seeded users: ${SEED_PASSWORD}`)
