@@ -39,10 +39,11 @@ Aplicación web para administrar las **prácticas profesionales** de estudiantes
 
 Estas reglas aplican a todo el trabajo y son verificables en revisión de código:
 
-- **Código en inglés:** identificadores, funciones, clases, archivos, nombres de tablas/columnas, constantes y mensajes internos se escriben en inglés (`fullName`, `createPractice`, `trainingPlan`). El código fuente no contiene texto en español.
+- **Código en inglés:** identificadores, funciones, archivos, nombres de tablas/columnas, constantes y mensajes internos se escriben en inglés (`fullName`, `createPractice`, `trainingPlan`). El código fuente no contiene texto en español.
 - **Interfaz de usuario en español:** toda la UI visible se muestra en español (es-CL): etiquetas, botones, títulos, mensajes de error/validación, fechas (`dd/mm/aaaa`) y textos. El inglés queda solo en el código, nunca en pantalla.
 - **Buenas prácticas, código limpio y principios SOLID:** nombres descriptivos, funciones pequeñas de una sola responsabilidad, separación de capas (rutas → servicios → repositorios → DB → vistas), DRY (cero duplicación), sin código muerto ni `TODO` pendientes, dependencias explícitas e inyección de dependencias donde aporte.
 - **Frontend con Bootstrap y skill `frontend-design`:** toda la UI se construye con Bootstrap 5 y la dirección del diseño (layout, componentes, jerarquía visual, responsividad) se realiza mediante el skill `frontend-design` del entorno de desarrollo.
+- **TypeScript y programación funcional (sin clases):** todo el código se escribe en TypeScript; se evita el uso de clases y se aplica programación funcional: funciones puras y pequeñas de una sola responsabilidad, composición de funciones, datos inmutables y sin estado mutable compartido ni efectos secundarios ocultos.
 
 ## 5. Actores y permisos (RBAC)
 
@@ -257,7 +258,22 @@ Los errores de validación se muestran en la vista (mensajes en español), conse
 - **Sesión:** JWT en cookie httpOnly (SSR); *alternativa JWT en header `Authorization` si se requiere API.*
 - **Rango de fechas:** fecha de término puede ser posterior al día actual (prácticas en curso o futuras), sin restricción adicional.
 
-## 16. Hitos sugeridos
+## 16. Etapas de implementación
+
+Cada etapa es autocontenida: se planifica, se implementa y se prueba de forma independiente, en orden. Una etapa termina solo cuando cumple su criterio de salida (columna «Cómo se prueba»); recién ahí se avanza a la siguiente.
+
+| # | Etapa | Qué se implementa | Cómo se prueba (criterio de salida) |
+|---|---|---|---|
+| 1 | Scaffold del proyecto | App Hono + TypeScript arrancando; Handlebars como motor de vistas; Drizzle + better-sqlite3 conectados; script `npm run dev`; layout base con Bootstrap. | `npm run dev` levanta la app sin errores y `GET /` renderiza la vista base con Bootstrap cargado. |
+| 2 | Esquema y datos base | Migraciones Drizzle que crean `usuarios`, `empresas`, `jefes_directos` y `practicas` con sus FKs; script de seed con datos mínimos (2 estudiantes, 2 profesores, 1 empresa, 1 jefe directo). | Las 4 tablas existen en SQLite con sus FK; consultar la base devuelve los datos del seed. |
+| 3 | Registro de usuarios | `GET/POST /auth/registro`; validación Zod (RUT válido y único, nombre, contraseña ≥ 8, carrera/especialidad según rol); hash Argon2id antes de insertar. | Un registro crea el usuario con `password_hash` (nunca texto plano); RUT duplicado o datos inválidos muestran mensajes en español y conservan lo ya ingresado. |
+| 4 | Login, logout y sesión JWT | `GET/POST /auth/login` y `POST /auth/logout`; JWT firmado en cookie httpOnly + SameSite=Lax; middleware `authRequired`. | Login con RUT + contraseña correctos emite la cookie y redirige; credenciales erróneas muestran error; `/practicas` sin sesión redirige a login; logout elimina la cookie. |
+| 5 | RBAC y ownership | Middlewares `requireRol('profesor')` y `ownerOrProfesor` aplicados a las rutas de prácticas. | Matriz de permisos de la sección 5 verificada en servidor: estudiante recibe 403 al editar/eliminar y al abrir práctica ajena; profesor accede a todas. |
+| 6 | CRUD de prácticas: crear y listar | `GET /practicas/nueva`, `POST /practicas`, `GET /practicas`; formulario con secciones práctica/empresa/jefe/profesor; creación de empresa y jefe desde el form; validación Zod completa; listado en tabla filtrado por rol. | Estudiante crea una práctica (queda como `estudiante_id` automático) y el listado solo muestra las suyas; profesor ve todas; cada regla de validación de la sección 11 falla con su mensaje en español. |
+| 7 | CRUD de prácticas: detalle, editar, eliminar | `GET /practicas/:id`, `GET/POST /practicas/:id/editar`, `POST /practicas/:id/eliminar`; partial de formulario compartido entre crear/editar; botones de acción según rol. | Profesor edita y elimina una práctica y los cambios persisten en la base; estudiante no ve los botones y recibe 403 si fuerza la ruta; eliminación física. |
+| 8 | Pulido de UI y cierre | Diseño final con Bootstrap 5 y skill `frontend-design`: responsividad, vista 403, errores bajo cada campo, fechas en `dd/mm/aaaa`, navegación por rol. | Recorrido completo en desktop y móvil (registro → login → crear → listar → detalle → editar/eliminar) sin errores; criterios de aceptación 1–7 cumplidos. |
+
+## 17. Hitos sugeridos
 
 | # | Hito | Criterio de salida |
 |---|---|---|
