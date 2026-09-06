@@ -194,6 +194,9 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
       form: EMPTY_FORM,
       errors: {},
       options: loadFormOptions(db),
+      submitLabel: 'Guardar práctica',
+      cancelUrl: '/practicas',
+      showBackButton: true,
     })
   })
 
@@ -213,6 +216,9 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
         form: rawToFormValues(body),
         errors: firstFieldErrors(parsed.error),
         options: loadFormOptions(db),
+        submitLabel: 'Guardar práctica',
+        cancelUrl: '/practicas',
+        showBackButton: true,
       })
     }
 
@@ -261,6 +267,8 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
       form: practiceToFormValues(practice),
       errors: {},
       options: loadFormOptions(db),
+      submitLabel: 'Guardar cambios',
+      cancelUrl: `/practicas/${practice.id}`,
     })
   })
 
@@ -280,6 +288,8 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
         form: rawToFormValues(body),
         errors: firstFieldErrors(parsed.error),
         options: loadFormOptions(db),
+        submitLabel: 'Guardar cambios',
+        cancelUrl: `/practicas/${id}`,
       })
     }
 
