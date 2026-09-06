@@ -1,11 +1,28 @@
 import Handlebars from 'handlebars'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import type { TemplateDelegate } from 'handlebars'
 import { viewsDir } from '../config.js'
 Handlebars.registerHelper('eq', (a: unknown, b: unknown) => a === b)
 
+const partialsDir = join(viewsDir, 'partials')
 const templateCache = new Map<string, TemplateDelegate>()
+
+/** Registers every Handlebars partial under `views/partials`, named by relative path (e.g. `practices/practice-form`). */
+function registerPartials(dir = partialsDir, prefix = ''): void {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = join(dir, entry.name)
+    if (entry.isDirectory()) {
+      registerPartials(fullPath, `${prefix}${entry.name}/`)
+    } else if (entry.name.endsWith('.hbs')) {
+      Handlebars.registerPartial(`${prefix}${entry.name.slice(0, -4)}`, readFileSync(fullPath, 'utf8'))
+    }
+  }
+}
+
+if (existsSync(partialsDir)) {
+  registerPartials()
+}
 
 function loadTemplate(name: string): TemplateDelegate {
   let template = templateCache.get(name)

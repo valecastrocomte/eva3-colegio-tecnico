@@ -14,9 +14,10 @@ El alcance, el modelo de datos, las reglas de negocio y el plan de etapas están
 | 4 | Login/logout y sesión JWT (cookie httpOnly + `authRequired`) | ✔ Ejecutada |
 | 5 | RBAC y ownership (`requireRol`, `ownerOrProfesor`) | ✔ Ejecutada |
 | 6 | CRUD de prácticas: crear y listar | ✔ Ejecutada |
-| 7–8 | Detalle, editar, eliminar y pulido UI | Pendiente |
+| 7 | CRUD de prácticas: detalle, editar y eliminar | ✔ Ejecutada |
+| 8 | Pulido de UI y cierre | Pendiente |
 
-El servidor sirve la vista base (`GET /`), un healthcheck (`GET /health`), el registro y el login/logout de usuarios (`/auth/registro`, `/auth/login`, `/auth/logout`), y la creación y el listado de prácticas (`/practicas`, `/practicas/nueva`) con RBAC. El detalle, edición y eliminación de prácticas y el pulido de UI corresponden a las etapas 7–8.
+El servidor sirve la vista base (`GET /`), un healthcheck (`GET /health`), el registro y el login/logout de usuarios (`/auth/registro`, `/auth/login`, `/auth/logout`), y el CRUD completo de prácticas (`/practicas`, `/practicas/nueva`, `/practicas/:id`, editar y eliminar) con RBAC. El pulido final de UI corresponde a la etapa 8.
 
 ## Stack tecnológico
 

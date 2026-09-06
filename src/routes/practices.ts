@@ -3,18 +3,27 @@ import type { Context } from 'hono'
 import type { AppEnv } from '../types.js'
 import type { DbClient } from '../db/index.js'
 import { authRequired } from '../middleware/auth.js'
+import { ownerOrProfesor, requireRol } from '../middleware/rbac.js'
 import { excerpt, toDisplayDate } from '../lib/display.js'
 import { readTextForm } from '../lib/forms.js'
 import { firstFieldErrors } from '../schemas/errors.js'
 import { createPracticeSchema } from '../schemas/practices.js'
+import type { CreatePracticeInput } from '../schemas/practices.js'
 import { listUsersByRole } from '../services/users.js'
 import { insertCompany, listCompanies } from '../services/companies.js'
 import {
   insertDirectSupervisor,
   listDirectSupervisors,
 } from '../services/direct-supervisors.js'
-import { insertPractice, listPractices } from '../services/practices.js'
-import type { PracticeListRow } from '../services/practices.js'
+import {
+  deletePractice,
+  findPracticeById,
+  findPracticeDetail,
+  insertPractice,
+  listPractices,
+  updatePractice,
+} from '../services/practices.js'
+import type { PracticeDetailRow, PracticeRow } from '../services/practices.js'
 
 export type PracticeFormValues = {
   companyMode: string
@@ -82,6 +91,27 @@ function rawToFormValues(body: Record<string, string>): PracticeFormValues {
   }
 }
 
+/** Prefills the form from an existing practice, keeping its company and direct supervisor selected. */
+function practiceToFormValues(practice: PracticeRow): PracticeFormValues {
+  return {
+    companyMode: 'existing',
+    companyId: String(practice.companyId),
+    companyName: '',
+    companyAddress: '',
+    companyPhone: '',
+    directSupervisorMode: 'existing',
+    directSupervisorId: String(practice.directSupervisorId),
+    directSupervisorName: '',
+    directSupervisorContact: '',
+    directSupervisorPosition: '',
+    studentId: String(practice.studentId),
+    supervisorId: String(practice.supervisorId),
+    startDate: practice.startDate,
+    endDate: practice.endDate,
+    activityDescription: practice.activityDescription,
+  }
+}
+
 function toSelectOption(rows: { id: number; name: string }[]): SelectOption[] {
   return rows.map((row) => ({ id: String(row.id), name: row.name }))
 }
@@ -99,8 +129,9 @@ function loadFormOptions(db: DbClient): FormOptions {
   }
 }
 
-function toListView(rows: PracticeListRow[]) {
+function toListView(rows: PracticeDetailRow[]) {
   return rows.map((row) => ({
+    id: row.id,
     studentName: row.studentName,
     supervisorName: row.supervisorName,
     companyName: row.companyName,
@@ -109,6 +140,28 @@ function toListView(rows: PracticeListRow[]) {
     endDate: toDisplayDate(row.endDate),
     activityDescription: excerpt(row.activityDescription),
   }))
+}
+
+/** Resolves the company and direct supervisor ids for a validated form (create or update). */
+function resolveCompanyAndDirectSupervisor(db: DbClient, values: CreatePracticeInput) {
+  // Number() is safe here: the schema only admits existing ids for each mode.
+  const companyId =
+    values.companyMode === 'existing'
+      ? Number(values.companyId)
+      : insertCompany(db, {
+          name: values.companyName,
+          address: values.companyAddress,
+          phone: values.companyPhone,
+        })
+  const directSupervisorId =
+    values.directSupervisorMode === 'existing'
+      ? Number(values.directSupervisorId)
+      : insertDirectSupervisor(db, {
+          name: values.directSupervisorName,
+          contact: values.directSupervisorContact,
+          position: values.directSupervisorPosition,
+        })
+  return { companyId, directSupervisorId }
 }
 
 export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
@@ -164,23 +217,7 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
     }
 
     const values = parsed.data
-    // Number() is safe here: the schema only admits existing ids for each mode.
-    const companyId =
-      values.companyMode === 'existing'
-        ? Number(values.companyId)
-        : insertCompany(db, {
-            name: values.companyName,
-            address: values.companyAddress,
-            phone: values.companyPhone,
-          })
-    const directSupervisorId =
-      values.directSupervisorMode === 'existing'
-        ? Number(values.directSupervisorId)
-        : insertDirectSupervisor(db, {
-            name: values.directSupervisorName,
-            contact: values.directSupervisorContact,
-            position: values.directSupervisorPosition,
-          })
+    const { companyId, directSupervisorId } = resolveCompanyAndDirectSupervisor(db, values)
 
     // The student can never pick a different owner: the account is forced server-side.
     insertPractice(db, {
@@ -196,5 +233,85 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
     return c.redirect('/practicas')
   })
 
+  app.get('/:id', ownerOrProfesor(db), (c) => {
+    const practice = c.var.practice
+    if (!practice) return c.notFound()
+    const detail = findPracticeDetail(db, practice.id)
+    if (!detail) return c.notFound()
+
+    return c.var.render('practices/detail', {
+      title: 'Detalle de la práctica',
+      practice: {
+        ...detail,
+        startDate: toDisplayDate(detail.startDate),
+        endDate: toDisplayDate(detail.endDate),
+      },
+    })
+  })
+
+  app.get('/:id/editar', requireRol('profesor'), (c) => {
+    const id = practiceId(c)
+    if (Number.isNaN(id)) return c.notFound()
+    const practice = findPracticeById(db, id)
+    if (!practice) return c.notFound()
+
+    return c.var.render('practices/editar', {
+      title: 'Editar práctica',
+      practiceId: practice.id,
+      form: practiceToFormValues(practice),
+      errors: {},
+      options: loadFormOptions(db),
+    })
+  })
+
+  app.post('/:id', requireRol('profesor'), async (c) => {
+    const id = practiceId(c)
+    if (Number.isNaN(id)) return c.notFound()
+    const current = findPracticeById(db, id)
+    if (!current) return c.notFound()
+
+    const body = await readTextForm(c)
+    const parsed = createPracticeSchema(db, { requireStudent: true }).safeParse(body)
+
+    if (!parsed.success) {
+      return c.var.render('practices/editar', {
+        title: 'Editar práctica',
+        practiceId: id,
+        form: rawToFormValues(body),
+        errors: firstFieldErrors(parsed.error),
+        options: loadFormOptions(db),
+      })
+    }
+
+    const values = parsed.data
+    const { companyId, directSupervisorId } = resolveCompanyAndDirectSupervisor(db, values)
+    updatePractice(db, id, {
+      studentId: Number(values.studentId),
+      supervisorId: Number(values.supervisorId),
+      companyId,
+      directSupervisorId,
+      startDate: values.startDate,
+      endDate: values.endDate,
+      activityDescription: values.activityDescription,
+    })
+
+    return c.redirect(`/practicas/${id}`)
+  })
+
+  app.post('/:id/eliminar', requireRol('profesor'), (c) => {
+    const id = practiceId(c)
+    if (Number.isNaN(id)) return c.notFound()
+    if (!findPracticeById(db, id)) return c.notFound()
+
+    deletePractice(db, id)
+    return c.redirect('/practicas')
+  })
+
   return app
+}
+
+/** Reads the `:id` path param as a positive integer (NaN otherwise). */
+function practiceId(c: Context<AppEnv>): number {
+  const value = Number(c.req.param('id'))
+  return Number.isInteger(value) && value > 0 ? value : NaN
 }

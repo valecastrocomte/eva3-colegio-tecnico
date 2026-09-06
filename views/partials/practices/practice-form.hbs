@@ -1,0 +1,266 @@
+<form method="post" action="{{formAction}}" novalidate>
+  <fieldset class="border rounded-3 p-3 mb-4">
+    <legend class="form-label fw-semibold px-2 w-auto mb-3">Datos de la práctica</legend>
+
+    {{#if (eq currentUser.role "profesor")}}
+      <div class="mb-3">
+        <label class="form-label" for="studentId">Estudiante</label>
+        <select
+          class="form-select {{#if errors.studentId}}is-invalid{{/if}}"
+          id="studentId"
+          name="studentId"
+        >
+          <option value="">Seleccione un estudiante</option>
+          {{#each options.students}}
+            <option value="{{id}}" {{#if (eq ../form.studentId id)}}selected{{/if}}>{{name}}</option>
+          {{/each}}
+        </select>
+        {{#if errors.studentId}}<div class="invalid-feedback">{{errors.studentId}}</div>{{/if}}
+      </div>
+    {{/if}}
+
+    <div class="mb-3">
+      <label class="form-label" for="supervisorId">Profesor supervisor</label>
+      <select
+        class="form-select {{#if errors.supervisorId}}is-invalid{{/if}}"
+        id="supervisorId"
+        name="supervisorId"
+      >
+        <option value="">Seleccione un profesor</option>
+        {{#each options.professors}}
+          <option value="{{id}}" {{#if (eq ../form.supervisorId id)}}selected{{/if}}>{{name}}</option>
+        {{/each}}
+      </select>
+      {{#if errors.supervisorId}}<div class="invalid-feedback">{{errors.supervisorId}}</div>{{/if}}
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label" for="startDate">Fecha de inicio</label>
+        <input
+          type="date"
+          class="form-control {{#if errors.startDate}}is-invalid{{/if}}"
+          id="startDate"
+          name="startDate"
+          value="{{form.startDate}}"
+        />
+        {{#if errors.startDate}}<div class="invalid-feedback">{{errors.startDate}}</div>{{/if}}
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="endDate">Fecha de término</label>
+        <input
+          type="date"
+          class="form-control {{#if errors.endDate}}is-invalid{{/if}}"
+          id="endDate"
+          name="endDate"
+          value="{{form.endDate}}"
+        />
+        {{#if errors.endDate}}<div class="invalid-feedback">{{errors.endDate}}</div>{{/if}}
+      </div>
+    </div>
+
+    <div class="mt-3">
+      <label class="form-label" for="activityDescription">Descripción de actividades</label>
+      <textarea
+        class="form-control {{#if errors.activityDescription}}is-invalid{{/if}}"
+        id="activityDescription"
+        name="activityDescription"
+        rows="4"
+        placeholder="Describe las actividades que realizarás en la práctica"
+      >{{form.activityDescription}}</textarea>
+      {{#if errors.activityDescription}}<div class="invalid-feedback">{{errors.activityDescription}}</div>{{/if}}
+    </div>
+  </fieldset>
+
+  <fieldset class="border rounded-3 p-3 mb-4">
+    <legend class="form-label fw-semibold px-2 w-auto mb-3">Empresa</legend>
+
+    <div class="btn-group w-100 mb-3" role="group" aria-label="Modo de empresa">
+      <input
+        type="radio"
+        class="btn-check"
+        name="companyMode"
+        id="company-mode-existing"
+        value="existing"
+        {{#if (eq form.companyMode "existing")}}checked{{/if}}
+      />
+      <label class="btn btn-outline-primary" for="company-mode-existing">Seleccionar existente</label>
+      <input
+        type="radio"
+        class="btn-check"
+        name="companyMode"
+        id="company-mode-new"
+        value="new"
+        {{#if (eq form.companyMode "new")}}checked{{/if}}
+      />
+      <label class="btn btn-outline-primary" for="company-mode-new">Registrar nueva</label>
+    </div>
+
+    <div class="mb-3 {{#if (eq form.companyMode "new")}}d-none{{/if}}" id="company-existing-block">
+      <label class="form-label" for="companyId">Empresa</label>
+      <select
+        class="form-select {{#if errors.companyId}}is-invalid{{/if}}"
+        id="companyId"
+        name="companyId"
+      >
+        <option value="">Seleccione una empresa</option>
+        {{#each options.companies}}
+          <option value="{{id}}" {{#if (eq ../form.companyId id)}}selected{{/if}}>{{name}}</option>
+        {{/each}}
+      </select>
+      {{#if errors.companyId}}<div class="invalid-feedback">{{errors.companyId}}</div>{{/if}}
+    </div>
+
+    <div class="mb-3 {{#if (eq form.companyMode "existing")}}d-none{{/if}}" id="company-new-block">
+      <label class="form-label" for="companyName">Nombre de la empresa</label>
+      <input
+        type="text"
+        class="form-control {{#if errors.companyName}}is-invalid{{/if}}"
+        id="companyName"
+        name="companyName"
+        value="{{form.companyName}}"
+      />
+      {{#if errors.companyName}}<div class="invalid-feedback">{{errors.companyName}}</div>{{/if}}
+    </div>
+
+    <div class="row g-3 {{#if (eq form.companyMode "existing")}}d-none{{/if}}" id="company-new-extra">
+      <div class="col-md-6">
+        <label class="form-label" for="companyAddress">Dirección</label>
+        <input
+          type="text"
+          class="form-control {{#if errors.companyAddress}}is-invalid{{/if}}"
+          id="companyAddress"
+          name="companyAddress"
+          value="{{form.companyAddress}}"
+        />
+        {{#if errors.companyAddress}}<div class="invalid-feedback">{{errors.companyAddress}}</div>{{/if}}
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="companyPhone">Teléfono</label>
+        <input
+          type="text"
+          class="form-control {{#if errors.companyPhone}}is-invalid{{/if}}"
+          id="companyPhone"
+          name="companyPhone"
+          value="{{form.companyPhone}}"
+        />
+        {{#if errors.companyPhone}}<div class="invalid-feedback">{{errors.companyPhone}}</div>{{/if}}
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="border rounded-3 p-3 mb-4">
+    <legend class="form-label fw-semibold px-2 w-auto mb-3">Jefe directo</legend>
+
+    <div class="btn-group w-100 mb-3" role="group" aria-label="Modo de jefe directo">
+      <input
+        type="radio"
+        class="btn-check"
+        name="directSupervisorMode"
+        id="supervisor-mode-existing"
+        value="existing"
+        {{#if (eq form.directSupervisorMode "existing")}}checked{{/if}}
+      />
+      <label class="btn btn-outline-primary" for="supervisor-mode-existing">Seleccionar existente</label>
+      <input
+        type="radio"
+        class="btn-check"
+        name="directSupervisorMode"
+        id="supervisor-mode-new"
+        value="new"
+        {{#if (eq form.directSupervisorMode "new")}}checked{{/if}}
+      />
+      <label class="btn btn-outline-primary" for="supervisor-mode-new">Registrar nuevo</label>
+    </div>
+
+    <div class="mb-3 {{#if (eq form.directSupervisorMode "new")}}d-none{{/if}}" id="supervisor-existing-block">
+      <label class="form-label" for="directSupervisorId">Jefe directo</label>
+      <select
+        class="form-select {{#if errors.directSupervisorId}}is-invalid{{/if}}"
+        id="directSupervisorId"
+        name="directSupervisorId"
+      >
+        <option value="">Seleccione un jefe directo</option>
+        {{#each options.directSupervisors}}
+          <option value="{{id}}" {{#if (eq ../form.directSupervisorId id)}}selected{{/if}}>{{name}}</option>
+        {{/each}}
+      </select>
+      {{#if errors.directSupervisorId}}<div class="invalid-feedback">{{errors.directSupervisorId}}</div>{{/if}}
+    </div>
+
+    <div class="mb-3 {{#if (eq form.directSupervisorMode "existing")}}d-none{{/if}}" id="supervisor-new-block">
+      <label class="form-label" for="directSupervisorName">Nombre del jefe directo</label>
+      <input
+        type="text"
+        class="form-control {{#if errors.directSupervisorName}}is-invalid{{/if}}"
+        id="directSupervisorName"
+        name="directSupervisorName"
+        value="{{form.directSupervisorName}}"
+      />
+      {{#if errors.directSupervisorName}}<div class="invalid-feedback">{{errors.directSupervisorName}}</div>{{/if}}
+    </div>
+
+    <div class="row g-3 {{#if (eq form.directSupervisorMode "existing")}}d-none{{/if}}" id="supervisor-new-extra">
+      <div class="col-md-6">
+        <label class="form-label" for="directSupervisorContact">Contacto</label>
+        <input
+          type="text"
+          class="form-control {{#if errors.directSupervisorContact}}is-invalid{{/if}}"
+          id="directSupervisorContact"
+          name="directSupervisorContact"
+          value="{{form.directSupervisorContact}}"
+          placeholder="Teléfono o correo"
+        />
+        {{#if errors.directSupervisorContact}}<div class="invalid-feedback">{{errors.directSupervisorContact}}</div>{{/if}}
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="directSupervisorPosition">Cargo</label>
+        <input
+          type="text"
+          class="form-control {{#if errors.directSupervisorPosition}}is-invalid{{/if}}"
+          id="directSupervisorPosition"
+          name="directSupervisorPosition"
+          value="{{form.directSupervisorPosition}}"
+        />
+        {{#if errors.directSupervisorPosition}}<div class="invalid-feedback">{{errors.directSupervisorPosition}}</div>{{/if}}
+      </div>
+    </div>
+  </fieldset>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary">{{submitLabel}}</button>
+    <a class="btn btn-outline-secondary" href="{{cancelUrl}}">Cancelar</a>
+  </div>
+</form>
+
+<script>
+  const companyRadios = document.querySelectorAll('input[name="companyMode"]')
+  const companyExisting = document.getElementById('company-existing-block')
+  const companyNewName = document.getElementById('company-new-block')
+  const companyNewExtra = document.getElementById('company-new-extra')
+
+  const supervisorRadios = document.querySelectorAll('input[name="directSupervisorMode"]')
+  const supervisorExisting = document.getElementById('supervisor-existing-block')
+  const supervisorNewName = document.getElementById('supervisor-new-block')
+  const supervisorNewExtra = document.getElementById('supervisor-new-extra')
+
+  const toggleCompanyMode = () => {
+    const isExisting = document.querySelector('input[name="companyMode"]:checked')?.value === 'existing'
+    companyExisting.classList.toggle('d-none', !isExisting)
+    companyNewName.classList.toggle('d-none', isExisting)
+    companyNewExtra.classList.toggle('d-none', isExisting)
+  }
+
+  const toggleSupervisorMode = () => {
+    const isExisting =
+      document.querySelector('input[name="directSupervisorMode"]:checked')?.value === 'existing'
+    supervisorExisting.classList.toggle('d-none', !isExisting)
+    supervisorNewName.classList.toggle('d-none', isExisting)
+    supervisorNewExtra.classList.toggle('d-none', isExisting)
+  }
+
+  companyRadios.forEach((input) => input.addEventListener('change', toggleCompanyMode))
+  supervisorRadios.forEach((input) => input.addEventListener('change', toggleSupervisorMode))
+  toggleCompanyMode()
+  toggleSupervisorMode()
+</script>

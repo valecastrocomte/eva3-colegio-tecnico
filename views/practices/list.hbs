@@ -19,6 +19,7 @@
             <th scope="col">Inicio</th>
             <th scope="col">Término</th>
             <th scope="col">Descripción</th>
+            <th scope="col" class="text-end">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -31,6 +32,20 @@
               <td class="text-nowrap">{{startDate}}</td>
               <td class="text-nowrap">{{endDate}}</td>
               <td class="text-body-secondary">{{activityDescription}}</td>
+              <td class="text-end text-nowrap">
+                <a class="btn btn-sm btn-outline-primary" href="/practicas/{{id}}">Ver</a>
+                {{#if (eq @root.currentUser.role "profesor")}}
+                  <a class="btn btn-sm btn-outline-secondary" href="/practicas/{{id}}/editar">Editar</a>
+                  <form
+                    method="post"
+                    action="/practicas/{{id}}/eliminar"
+                    class="d-inline"
+                    onsubmit="return confirm('¿Eliminar esta práctica? Esta acción no se puede deshacer.')"
+                  >
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                  </form>
+                {{/if}}
+              </td>
             </tr>
           {{/each}}
         </tbody>

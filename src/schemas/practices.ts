@@ -144,3 +144,5 @@ export function createPracticeSchema(
       }
     })
 }
+
+export type CreatePracticeInput = z.infer<ReturnType<typeof createPracticeSchema>>

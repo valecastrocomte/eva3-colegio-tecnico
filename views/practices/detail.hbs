@@ -1,0 +1,60 @@
+<section class="row justify-content-center">
+  <div class="col-lg-9">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+      <h1 class="fs-4 mb-0">Detalle de la práctica</h1>
+      <a class="btn btn-outline-secondary" href="/practicas">Volver al listado</a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4 p-md-5">
+        <div class="row g-4">
+          <div class="col-md-6">
+            <h2 class="fs-6 text-uppercase text-body-secondary mb-2">Estudiante</h2>
+            <p class="mb-0 fw-semibold">{{practice.studentName}}</p>
+            <p class="mb-0 text-body-secondary">{{practice.studentCareer}}</p>
+          </div>
+          <div class="col-md-6">
+            <h2 class="fs-6 text-uppercase text-body-secondary mb-2">Profesor supervisor</h2>
+            <p class="mb-0 fw-semibold">{{practice.supervisorName}}</p>
+            <p class="mb-0 text-body-secondary">{{practice.supervisorSpecialty}}</p>
+          </div>
+          <div class="col-md-6">
+            <h2 class="fs-6 text-uppercase text-body-secondary mb-2">Empresa</h2>
+            <p class="mb-0 fw-semibold">{{practice.companyName}}</p>
+            <p class="mb-0 text-body-secondary">{{practice.companyAddress}}</p>
+            <p class="mb-0 text-body-secondary">{{practice.companyPhone}}</p>
+          </div>
+          <div class="col-md-6">
+            <h2 class="fs-6 text-uppercase text-body-secondary mb-2">Jefe directo</h2>
+            <p class="mb-0 fw-semibold">{{practice.directSupervisorName}}</p>
+            <p class="mb-0 text-body-secondary">{{practice.directSupervisorPosition}}</p>
+            <p class="mb-0 text-body-secondary">{{practice.directSupervisorContact}}</p>
+          </div>
+          <div class="col-md-6">
+            <h2 class="fs-6 text-uppercase text-body-secondary mb-2">Fechas</h2>
+            <p class="mb-0">Inicio: <span class="fw-semibold">{{practice.startDate}}</span></p>
+            <p class="mb-0">Término: <span class="fw-semibold">{{practice.endDate}}</span></p>
+          </div>
+          <div class="col-12">
+            <h2 class="fs-6 text-uppercase text-body-secondary mb-2">Descripción de actividades</h2>
+            <p class="mb-0">{{practice.activityDescription}}</p>
+          </div>
+        </div>
+
+        {{#if (eq currentUser.role "profesor")}}
+          <hr class="my-4" />
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-primary" href="/practicas/{{practice.id}}/editar">Editar práctica</a>
+            <form
+              method="post"
+              action="/practicas/{{practice.id}}/eliminar"
+              onsubmit="return confirm('¿Eliminar esta práctica? Esta acción no se puede deshacer.')"
+            >
+              <button type="submit" class="btn btn-outline-danger">Eliminar práctica</button>
+            </form>
+          </div>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</section>
