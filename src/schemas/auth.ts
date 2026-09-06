@@ -52,3 +52,10 @@ export function firstFieldErrors(error: z.ZodError): Record<string, string> {
   }
   return errors
 }
+
+export const loginSchema = z.object({
+  rut: z.string().trim().min(1, 'El RUT es obligatorio'),
+  password: z.string().min(1, 'La contraseña es obligatoria'),
+})
+
+export type LoginInput = z.infer<typeof loginSchema>

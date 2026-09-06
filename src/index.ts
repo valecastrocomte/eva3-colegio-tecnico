@@ -8,9 +8,11 @@ import { createDb } from './db/index.js'
 import { migrate } from './db/migrate.js'
 import { ensureBootstrapAssets } from './lib/vendor.js'
 import { createAuthRoutes } from './routes/auth.js'
+import { createAttachUser } from './middleware/auth.js'
 import { renderer } from './middleware/renderer.js'
+import type { AppConfig } from './config.js'
 
-function createApp() {
+function createApp(config: AppConfig) {
   const app = new Hono<AppEnv>()
 
   app.use(
@@ -20,6 +22,7 @@ function createApp() {
       rewriteRequestPath: (path) => path.replace(/^\/assets/, ''),
     })
   )
+  app.use('*', createAttachUser(config.jwtSecret))
   app.use('*', renderer)
 
   app.get('/', (c) =>
@@ -28,7 +31,7 @@ function createApp() {
     })
   )
 
-  app.route('/auth', createAuthRoutes(db))
+  app.route('/auth', createAuthRoutes(db, config))
 
   app.get('/health', (c) => {
     try {
@@ -47,10 +50,9 @@ const config = loadConfig()
 ensureBootstrapAssets()
 
 const db = createDb(config.databasePath)
-migrate(db)
+const app = createApp(config)
 console.log(`[db] SQLite en ${config.databasePath}`)
 
-const app = createApp()
 
 serve({ fetch: app.fetch, port: config.port }, (info) => {
   console.log(`[server] escuchando en http://localhost:${info.port}`)

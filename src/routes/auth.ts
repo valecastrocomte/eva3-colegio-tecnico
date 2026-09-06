@@ -1,11 +1,15 @@
 import { Hono } from 'hono'
 import type { Context } from 'hono'
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import type { AppEnv } from '../types.js'
+import type { AppConfig } from '../config.js'
 import type { DbClient } from '../db/index.js'
 import { normalizeRut } from '../lib/rut.js'
-import { hashPassword } from '../lib/password.js'
-import { firstFieldErrors, registrationSchema } from '../schemas/auth.js'
+import { hashPassword, verifyPassword } from '../lib/password.js'
+import { createSessionToken, SESSION_COOKIE } from '../lib/session.js'
+import { firstFieldErrors, loginSchema, registrationSchema } from '../schemas/auth.js'
 import { findUserByRut, insertUser } from '../services/users.js'
+import { authRequired } from '../middleware/auth.js'
 
 export type RegistrationFormValues = {
   rut: string
@@ -14,6 +18,11 @@ export type RegistrationFormValues = {
   role: string
   career: string
   specialty: string
+}
+
+export type LoginFormValues = {
+  rut: string
+  password: string
 }
 
 const EMPTY_FORM: RegistrationFormValues = {
@@ -25,8 +34,8 @@ const EMPTY_FORM: RegistrationFormValues = {
   specialty: '',
 }
 
-/** Rebuilds form values from raw submitted fields, preserving whatever the user typed. */
-function rawToFormValues(body: Record<string, string>): RegistrationFormValues {
+/** Rebuilds registration form values from raw submitted fields, preserving whatever the user typed. */
+function rawToRegistrationValues(body: Record<string, string>): RegistrationFormValues {
   return {
     rut: body.rut ?? '',
     fullName: body.fullName ?? '',
@@ -37,6 +46,13 @@ function rawToFormValues(body: Record<string, string>): RegistrationFormValues {
   }
 }
 
+function rawToLoginValues(body: Record<string, string>): LoginFormValues {
+  return {
+    rut: body.rut ?? '',
+    password: body.password ?? '',
+  }
+}
+
 async function readTextForm(c: Context<AppEnv>): Promise<Record<string, string>> {
   const form = await c.req.formData()
   return Object.fromEntries(
@@ -44,7 +60,7 @@ async function readTextForm(c: Context<AppEnv>): Promise<Record<string, string>>
   )
 }
 
-export function createAuthRoutes(db: DbClient): Hono<AppEnv> {
+export function createAuthRoutes(db: DbClient, config: AppConfig): Hono<AppEnv> {
   const app = new Hono<AppEnv>()
 
   app.get('/registro', (c) =>
@@ -62,7 +78,7 @@ export function createAuthRoutes(db: DbClient): Hono<AppEnv> {
     if (!parsed.success) {
       return c.var.render('auth/registro', {
         title: 'Registro',
-        form: rawToFormValues(body),
+        form: rawToRegistrationValues(body),
         errors: firstFieldErrors(parsed.error),
       })
     }
@@ -72,7 +88,7 @@ export function createAuthRoutes(db: DbClient): Hono<AppEnv> {
     if (!normalizedRut || findUserByRut(db, normalizedRut)) {
       return c.var.render('auth/registro', {
         title: 'Registro',
-        form: rawToFormValues(body),
+        form: rawToRegistrationValues(body),
         errors: { rut: 'El RUT ya está registrado' },
       })
     }
@@ -92,6 +108,69 @@ export function createAuthRoutes(db: DbClient): Hono<AppEnv> {
       success: true,
       fullName: values.fullName,
     })
+  })
+
+  app.get('/login', (c) => {
+    if (c.var.currentUser) {
+      return c.redirect('/')
+    }
+    return c.var.render('auth/login', {
+      title: 'Iniciar sesión',
+      form: { rut: '', password: '' },
+      errors: {},
+    })
+  })
+
+  app.post('/login', async (c) => {
+    const body = await readTextForm(c)
+
+    const parsed = loginSchema.safeParse(body)
+    if (!parsed.success) {
+      return c.var.render('auth/login', {
+        title: 'Iniciar sesión',
+        form: rawToLoginValues(body),
+        errors: firstFieldErrors(parsed.error),
+      })
+    }
+
+    const values = parsed.data
+    const normalizedRut = normalizeRut(values.rut)
+    const user = normalizedRut ? findUserByRut(db, normalizedRut) : undefined
+
+    let passwordMatches = false
+    if (user) {
+      try {
+        passwordMatches = await verifyPassword(values.password, user.passwordHash)
+      } catch {
+        passwordMatches = false
+      }
+    }
+
+    if (!user || !passwordMatches) {
+      return c.var.render('auth/login', {
+        title: 'Iniciar sesión',
+        form: rawToLoginValues(body),
+        errors: { credentials: 'RUT o contraseña incorrectos' },
+      })
+    }
+
+    const token = await createSessionToken(
+      { id: user.id, role: user.role, name: user.fullName },
+      config.jwtSecret,
+      config.jwtExpiresSeconds
+    )
+    setCookie(c, SESSION_COOKIE, token, {
+      httpOnly: true,
+      sameSite: 'Lax',
+      path: '/',
+      maxAge: config.jwtExpiresSeconds,
+    })
+    return c.redirect('/')
+  })
+
+  app.post('/logout', authRequired, (c) => {
+    deleteCookie(c, SESSION_COOKIE, { path: '/' })
+    return c.redirect('/')
   })
 
   return app

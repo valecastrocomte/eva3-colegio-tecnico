@@ -11,9 +11,10 @@ El alcance, el modelo de datos, las reglas de negocio y el plan de etapas están
 | 1 | Scaffold: Hono + TypeScript + Handlebars + Drizzle/SQLite + Bootstrap local | ✔ Ejecutada |
 | 2 | Esquema Drizzle + migraciones + seed de datos base | ✔ Ejecutada |
 | 3 | Registro de usuarios (validación Zod + Argon2id) | ✔ Ejecutada |
-| 4–8 | Login/logout (JWT), RBAC, CRUD de prácticas, pulido UI | Pendiente |
+| 4 | Login/logout y sesión JWT (cookie httpOnly + `authRequired`) | ✔ Ejecutada |
+| 5–8 | RBAC, CRUD de prácticas, pulido UI | Pendiente |
 
-El servidor sirve la vista base (`GET /`), un healthcheck (`GET /health`) y el registro de usuarios (`/auth/registro`). El login con JWT, el RBAC y el CRUD de prácticas corresponden a las etapas 4–7.
+El servidor sirve la vista base (`GET /`), un healthcheck (`GET /health`), el registro y el login/logout de usuarios (`/auth/registro`, `/auth/login`, `/auth/logout`). El RBAC y el CRUD de prácticas corresponden a las etapas 5–7.
 
 ## Stack tecnológico
 
@@ -51,6 +52,8 @@ Variables de entorno (`.env`):
 |---|---|---|
 | `PORT` | `3000` | Puerto del servidor HTTP |
 | `DATABASE_PATH` | `./data/app.db` | Ruta del archivo SQLite (relativa a la raíz del proyecto) |
+| `JWT_SECRET` | — | Secreto para firmar los JWT de sesión (obligatorio en producción) |
+| `JWT_EXPIRES_SECONDS` | `604800` | Duración de la sesión en segundos (7 días) |
 
 ### Scripts
 
@@ -73,18 +76,29 @@ Los usuarios demo creados por `npm run db:seed` usan la contraseña `clave1234` 
 ```
 ├── src/
 │   ├── index.ts              # App Hono, estáticos, rutas / y /health, arranque
-│   ├── config.ts             # Config desde entorno; rutas absolutas de views/public
+│   ├── config.ts             # Config desde entorno (puerto, DB, JWT); rutas absolutas
 │   ├── types.ts              # AppEnv (tipado de Variables de Hono)
 │   ├── middleware/
+│   │   ├── auth.ts           # attachUser (sesión JWT) y authRequired
 │   │   └── renderer.ts       # Middleware que expone c.var.render() para las vistas
 │   ├── lib/
 │   │   ├── template-engine.ts# Compilación y caché de plantillas Handlebars
-│   │   └── vendor.ts         # Copia Bootstrap de node_modules → public/vendor
+│   │   ├── vendor.ts         # Copia Bootstrap de node_modules → public/vendor
+│   │   ├── rut.ts            # Validación y normalización de RUT (dígito verificador)
+│   │   ├── password.ts       # Hash y verificación Argon2id
+│   │   └── session.ts        # Firma y verificación de JWT de sesión
+│   ├── schemas/
+│   │   └── auth.ts           # Schemas Zod de registro y login
+│   ├── services/
+│   │   └── users.ts          # Consultas de usuarios (findByRut, insert)
+│   ├── routes/
+│   │   └── auth.ts           # Rutas /auth/registro, /auth/login, /auth/logout
 │   └── db/
 │       └── index.ts          # Cliente better-sqlite3 + Drizzle (WAL, foreign_keys ON)
 ├── views/
 │   ├── home.hbs              # Vista de inicio
-│   └── layouts/main.hbs      # Layout base (lang="es-CL", navbar, footer)
+│   ├── auth/                 # Vistas de registro y login
+│   └── layouts/main.hbs      # Layout base (lang="es-CL", navbar con sesión, footer)
 ├── public/vendor/            # Assets de Bootstrap (generados en runtime, gitignored)
 ├── data/                     # Base SQLite de desarrollo (gitignored)
 ├── BRIEF.md                  # Especificación completa del sistema
