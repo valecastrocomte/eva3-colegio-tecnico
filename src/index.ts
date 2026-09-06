@@ -32,6 +32,9 @@ function createApp(config: AppConfig) {
     })
   )
 
+  app.get('/login', (c) => c.redirect('/auth/login', 302))
+  app.get('/LOGIN', (c) => c.redirect('/auth/login', 302))
+
   app.route('/auth', createAuthRoutes(db, config))
   app.route('/practicas', createPracticesRoutes(db))
 
