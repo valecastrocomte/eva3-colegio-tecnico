@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{title}} · Prácticas Profesionales</title>
+    <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.min.css" />
+  </head>
+  <body class="d-flex flex-column min-vh-100 bg-body-tertiary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container">
+        <a class="navbar-brand" href="/">Prácticas Profesionales</a>
+        <div class="d-flex">
+          <a class="btn btn-sm btn-outline-light" href="/auth/login">Iniciar sesión</a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container flex-grow-1 py-4">
+      {{{body}}}
+    </main>
+
+    <footer class="border-top py-3 text-center text-body-secondary">
+      <div class="container small">
+        Sistema de Gestión de Prácticas Profesionales
+      </div>
+    </footer>
+
+    <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

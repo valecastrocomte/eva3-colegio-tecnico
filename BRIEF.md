@@ -44,6 +44,7 @@ Estas reglas aplican a todo el trabajo y son verificables en revisión de códig
 - **Buenas prácticas, código limpio y principios SOLID:** nombres descriptivos, funciones pequeñas de una sola responsabilidad, separación de capas (rutas → servicios → repositorios → DB → vistas), DRY (cero duplicación), sin código muerto ni `TODO` pendientes, dependencias explícitas e inyección de dependencias donde aporte.
 - **Frontend con Bootstrap y skill `frontend-design`:** toda la UI se construye con Bootstrap 5 y la dirección del diseño (layout, componentes, jerarquía visual, responsividad) se realiza mediante el skill `frontend-design` del entorno de desarrollo.
 - **TypeScript y programación funcional (sin clases):** todo el código se escribe en TypeScript; se evita el uso de clases y se aplica programación funcional: funciones puras y pequeñas de una sola responsabilidad, composición de funciones, datos inmutables y sin estado mutable compartido ni efectos secundarios ocultos.
+- **Documentación actualizada antes de implementar librerías:** antes de implementar o integrar cualquier librería, leer la última documentación oficial usando `context7`; no asumir APIs ni versiones de memoria.
 
 ## 5. Actores y permisos (RBAC)
 
