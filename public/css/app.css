@@ -1,0 +1,252 @@
+/* ============================================================
+   Tema oscuro — Prácticas Profesionales
+   Overrides de Bootstrap 5.3 (carga posterior a bootstrap.min.css)
+
+   Paleta:
+     Fondo      #0A0A0A  (negro)
+     Superficie #151515  (gris oscuro: tarjetas, inputs, tablas)
+     Principal  #00E5FF  (cyan)      → botones primarios, links, marca
+     Secundario #8B5CF6  (violeta)   → acciones secundarias, foco
+     Texto      #E8EAF0 / #9CA3AF   (blanco suave y gris)
+   ============================================================ */
+
+:root {
+  color-scheme: dark;
+
+  /* -------- Paleta de marca -------- */
+  --app-bg: #0a0a0a;
+  --app-surface: #151515;
+  --app-surface-raised: #1f1f1f;
+  --app-primary: #00e5ff;
+  --app-primary-rgb: 0, 229, 255;
+  --app-primary-hover: #00cfe9;
+  --app-secondary: #8b5cf6;
+  --app-secondary-rgb: 139, 92, 246;
+  --app-secondary-hover: #7a4bea;
+  --app-text: #e8eaf0;
+  --app-text-rgb: 232, 234, 240;
+  --app-text-muted: #9ca3af;
+  --app-text-muted-rgb: 156, 163, 175;
+  --app-border: #26262b;
+  --app-danger: #f87171;
+  --app-danger-strong: #dc2626;
+
+  /* -------- Remapeo de variables Bootstrap -------- */
+  --bs-primary: var(--app-primary);
+  --bs-primary-rgb: var(--app-primary-rgb);
+  --bs-primary-bg-subtle: rgba(0, 229, 255, 0.12);
+  --bs-primary-border-subtle: rgba(0, 229, 255, 0.35);
+  --bs-primary-text-emphasis: var(--app-primary);
+  --bs-secondary: var(--app-secondary);
+  --bs-secondary-rgb: var(--app-secondary-rgb);
+  --bs-secondary-bg-subtle: rgba(139, 92, 246, 0.12);
+  --bs-secondary-border-subtle: rgba(139, 92, 246, 0.35);
+  --bs-secondary-text-emphasis: var(--app-secondary);
+
+  --bs-body-bg: var(--app-surface);
+  --bs-body-bg-rgb: 21, 21, 21;
+  --bs-body-color: var(--app-text);
+  --bs-body-color-rgb: var(--app-text-rgb);
+  --bs-emphasis-color: var(--app-text);
+  --bs-emphasis-color-rgb: var(--app-text-rgb);
+  --bs-secondary-color: var(--app-text-muted);
+  --bs-secondary-color-rgb: var(--app-text-muted-rgb);
+  --bs-tertiary-color: rgba(156, 163, 175, 0.75);
+  --bs-tertiary-bg: var(--app-surface);
+  --bs-tertiary-bg-rgb: 10, 10, 10;
+
+  --bs-border-color: var(--app-border);
+  --bs-border-color-translucent: rgba(38, 38, 43, 0.6);
+
+  --bs-link-color: var(--app-primary);
+  --bs-link-color-rgb: var(--app-primary-rgb);
+  --bs-link-hover-color: #33eaff;
+  --bs-link-hover-color-rgb: 51, 234, 255;
+
+  --bs-focus-ring-color: rgba(0, 229, 255, 0.3);
+  --bs-focus-ring-opacity: 0.3;
+
+  --bs-card-bg: var(--app-surface);
+  --bs-card-color: var(--app-text);
+  --bs-card-border-color: var(--app-border);
+
+  --bs-table-bg: var(--app-surface);
+  --bs-table-color: var(--app-text);
+  --bs-table-border-color: var(--app-border);
+  --bs-table-striped-bg: rgba(232, 234, 240, 0.045);
+  --bs-table-hover-bg: rgba(232, 234, 240, 0.07);
+
+  --bs-form-invalid-color: var(--app-danger);
+  --bs-form-invalid-border-color: var(--app-danger);
+
+  --bs-danger-text-emphasis: var(--app-danger);
+  --bs-danger-bg-subtle: #2a1215;
+  --bs-danger-border-subtle: #3f1a1e;
+  --bs-success-text-emphasis: #4ade80;
+  --bs-success-bg-subtle: #0e2a1c;
+  --bs-success-border-subtle: #1a4732;
+
+  --bs-box-shadow-sm: 0 0.25rem 0.9rem rgba(0, 0, 0, 0.45);
+}
+
+/* -------- Base -------- */
+body {
+  background-color: var(--app-bg);
+}
+
+::selection {
+  background-color: rgba(139, 92, 246, 0.35);
+  color: var(--app-text);
+}
+
+.text-white {
+  color: var(--app-text) !important;
+}
+
+/* -------- Navbar: superficie oscura, marca cyan -------- */
+.navbar.bg-primary {
+  background-color: var(--app-surface) !important;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.navbar-brand {
+  color: var(--app-primary);
+  font-weight: 600;
+}
+
+.navbar-brand:hover,
+.navbar-brand:focus-visible {
+  color: var(--app-primary);
+}
+
+.navbar .nav-link {
+  color: var(--app-text-muted);
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus-visible {
+  color: var(--app-primary);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(232, 234, 240, 0.85)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* -------- Botones: primario cyan -------- */
+.btn-primary {
+  --bs-btn-color: #0a0a0a;
+  --bs-btn-bg: var(--app-primary);
+  --bs-btn-border-color: var(--app-primary);
+  --bs-btn-hover-color: #0a0a0a;
+  --bs-btn-hover-bg: var(--app-primary-hover);
+  --bs-btn-hover-border-color: var(--app-primary-hover);
+  --bs-btn-focus-shadow-rgb: var(--app-primary-rgb);
+  --bs-btn-active-color: #0a0a0a;
+  --bs-btn-active-bg: var(--app-primary-hover);
+  --bs-btn-active-border-color: var(--app-primary-hover);
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.25);
+  --bs-btn-disabled-color: #0a0a0a;
+  --bs-btn-disabled-bg: var(--app-primary);
+  --bs-btn-disabled-border-color: var(--app-primary);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--app-primary);
+  --bs-btn-border-color: var(--app-primary);
+  --bs-btn-hover-color: #0a0a0a;
+  --bs-btn-hover-bg: var(--app-primary);
+  --bs-btn-hover-border-color: var(--app-primary);
+  --bs-btn-focus-shadow-rgb: var(--app-primary-rgb);
+  --bs-btn-active-color: #0a0a0a;
+  --bs-btn-active-bg: var(--app-primary);
+  --bs-btn-active-border-color: var(--app-primary);
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.25);
+  --bs-btn-disabled-color: var(--app-primary);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: var(--app-primary);
+  --bs-gradient: none;
+}
+
+/* -------- Botones: secundario violeta -------- */
+.btn-secondary {
+  --bs-btn-color: #ffffff;
+  --bs-btn-bg: var(--app-secondary);
+  --bs-btn-border-color: var(--app-secondary);
+  --bs-btn-hover-color: #ffffff;
+  --bs-btn-hover-bg: var(--app-secondary-hover);
+  --bs-btn-hover-border-color: var(--app-secondary-hover);
+  --bs-btn-focus-shadow-rgb: var(--app-secondary-rgb);
+  --bs-btn-active-color: #ffffff;
+  --bs-btn-active-bg: var(--app-secondary-hover);
+  --bs-btn-active-border-color: var(--app-secondary-hover);
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.25);
+  --bs-btn-disabled-color: #ffffff;
+  --bs-btn-disabled-bg: var(--app-secondary);
+  --bs-btn-disabled-border-color: var(--app-secondary);
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: var(--app-secondary);
+  --bs-btn-border-color: var(--app-secondary);
+  --bs-btn-hover-color: #ffffff;
+  --bs-btn-hover-bg: var(--app-secondary);
+  --bs-btn-hover-border-color: var(--app-secondary);
+  --bs-btn-focus-shadow-rgb: var(--app-secondary-rgb);
+  --bs-btn-active-color: #ffffff;
+  --bs-btn-active-bg: var(--app-secondary);
+  --bs-btn-active-border-color: var(--app-secondary);
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: var(--app-secondary);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: var(--app-secondary);
+  --bs-gradient: none;
+}
+
+/* -------- Botones: neutro y peligro -------- */
+.btn-outline-light {
+  --bs-btn-color: #e5e7eb;
+  --bs-btn-border-color: #e5e7eb;
+  --bs-btn-hover-color: #0a0a0a;
+  --bs-btn-hover-bg: #e5e7eb;
+  --bs-btn-hover-border-color: #e5e7eb;
+  --bs-btn-focus-shadow-rgb: 229, 231, 235;
+  --bs-btn-active-color: #0a0a0a;
+  --bs-btn-active-bg: #e5e7eb;
+  --bs-btn-active-border-color: #e5e7eb;
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: #e5e7eb;
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: #e5e7eb;
+  --bs-gradient: none;
+}
+
+.btn-outline-danger {
+  --bs-btn-color: var(--app-danger);
+  --bs-btn-border-color: var(--app-danger);
+  --bs-btn-hover-color: #ffffff;
+  --bs-btn-hover-bg: var(--app-danger-strong);
+  --bs-btn-hover-border-color: var(--app-danger-strong);
+  --bs-btn-focus-shadow-rgb: 248, 113, 113;
+  --bs-btn-active-color: #ffffff;
+  --bs-btn-active-bg: var(--app-danger-strong);
+  --bs-btn-active-border-color: var(--app-danger-strong);
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: var(--app-danger);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: var(--app-danger);
+  --bs-gradient: none;
+}
+
+/* -------- Formularios: foco cyan, inválidos legibles -------- */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--app-primary);
+  box-shadow: 0 0 0 0.25rem rgba(0, 229, 255, 0.25);
+}
+
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus,
+.was-validated .form-control:invalid:focus,
+.was-validated .form-select:invalid:focus {
+  box-shadow: 0 0 0 0.25rem rgba(248, 113, 113, 0.25);
+}
