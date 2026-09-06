@@ -108,7 +108,7 @@ export function createAuthRoutes(db: DbClient, config: AppConfig): Hono<AppEnv> 
 
   app.get('/login', (c) => {
     if (c.var.currentUser) {
-      return c.redirect('/')
+      return c.redirect('/practicas')
     }
     return c.var.render('auth/login', {
       title: 'Iniciar sesión',
@@ -161,7 +161,7 @@ export function createAuthRoutes(db: DbClient, config: AppConfig): Hono<AppEnv> 
       path: '/',
       maxAge: config.jwtExpiresSeconds,
     })
-    return c.redirect('/')
+    return c.redirect('/practicas')
   })
 
   app.post('/logout', authRequired, (c) => {
