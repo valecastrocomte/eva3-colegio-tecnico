@@ -41,18 +41,6 @@ export const registrationSchema = z
 
 export type RegistrationInput = z.infer<typeof registrationSchema>
 
-/** Maps a ZodError to `{ field: firstMessage }` for the view. */
-export function firstFieldErrors(error: z.ZodError): Record<string, string> {
-  const errors: Record<string, string> = {}
-  for (const issue of error.issues) {
-    const field = issue.path[0]
-    if (typeof field === 'string' && !(field in errors)) {
-      errors[field] = issue.message
-    }
-  }
-  return errors
-}
-
 export const loginSchema = z.object({
   rut: z.string().trim().min(1, 'El RUT es obligatorio'),
   password: z.string().min(1, 'La contraseña es obligatoria'),

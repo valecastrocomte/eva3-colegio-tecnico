@@ -7,7 +7,9 @@ import type { DbClient } from '../db/index.js'
 import { normalizeRut } from '../lib/rut.js'
 import { hashPassword, verifyPassword } from '../lib/password.js'
 import { createSessionToken, SESSION_COOKIE } from '../lib/session.js'
-import { firstFieldErrors, loginSchema, registrationSchema } from '../schemas/auth.js'
+import { readTextForm } from '../lib/forms.js'
+import { firstFieldErrors } from '../schemas/errors.js'
+import { loginSchema, registrationSchema } from '../schemas/auth.js'
 import { findUserByRut, insertUser } from '../services/users.js'
 import { authRequired } from '../middleware/auth.js'
 
@@ -53,12 +55,6 @@ function rawToLoginValues(body: Record<string, string>): LoginFormValues {
   }
 }
 
-async function readTextForm(c: Context<AppEnv>): Promise<Record<string, string>> {
-  const form = await c.req.formData()
-  return Object.fromEntries(
-    [...form.entries()].map(([key, value]) => [key, typeof value === 'string' ? value : ''])
-  )
-}
 
 export function createAuthRoutes(db: DbClient, config: AppConfig): Hono<AppEnv> {
   const app = new Hono<AppEnv>()

@@ -12,9 +12,11 @@ El alcance, el modelo de datos, las reglas de negocio y el plan de etapas están
 | 2 | Esquema Drizzle + migraciones + seed de datos base | ✔ Ejecutada |
 | 3 | Registro de usuarios (validación Zod + Argon2id) | ✔ Ejecutada |
 | 4 | Login/logout y sesión JWT (cookie httpOnly + `authRequired`) | ✔ Ejecutada |
-| 5–8 | RBAC, CRUD de prácticas, pulido UI | Pendiente |
+| 5 | RBAC y ownership (`requireRol`, `ownerOrProfesor`) | ✔ Ejecutada |
+| 6 | CRUD de prácticas: crear y listar | ✔ Ejecutada |
+| 7–8 | Detalle, editar, eliminar y pulido UI | Pendiente |
 
-El servidor sirve la vista base (`GET /`), un healthcheck (`GET /health`), el registro y el login/logout de usuarios (`/auth/registro`, `/auth/login`, `/auth/logout`). El RBAC y el CRUD de prácticas corresponden a las etapas 5–7.
+El servidor sirve la vista base (`GET /`), un healthcheck (`GET /health`), el registro y el login/logout de usuarios (`/auth/registro`, `/auth/login`, `/auth/logout`), y la creación y el listado de prácticas (`/practicas`, `/practicas/nueva`) con RBAC. El detalle, edición y eliminación de prácticas y el pulido de UI corresponden a las etapas 7–8.
 
 ## Stack tecnológico
 

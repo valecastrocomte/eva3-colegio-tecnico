@@ -1,0 +1,48 @@
+<section>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+      <h1 class="fs-4 mb-1">{{title}}</h1>
+      <p class="text-body-secondary mb-0">Registro y seguimiento de prácticas profesionales.</p>
+    </div>
+    <a class="btn btn-primary" href="/practicas/nueva">Nueva práctica</a>
+  </div>
+
+  {{#if practices}}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th scope="col">Estudiante</th>
+            <th scope="col">Empresa</th>
+            <th scope="col">Jefe directo</th>
+            <th scope="col">Profesor supervisor</th>
+            <th scope="col">Inicio</th>
+            <th scope="col">Término</th>
+            <th scope="col">Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each practices}}
+            <tr>
+              <td class="fw-semibold">{{studentName}}</td>
+              <td>{{companyName}}</td>
+              <td>{{directSupervisorName}}</td>
+              <td>{{supervisorName}}</td>
+              <td class="text-nowrap">{{startDate}}</td>
+              <td class="text-nowrap">{{endDate}}</td>
+              <td class="text-body-secondary">{{activityDescription}}</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  {{else}}
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4 p-md-5 text-center">
+        <h2 class="fs-5 mb-2">No hay prácticas registradas</h2>
+        <p class="text-body-secondary mb-3">{{emptyMessage}}</p>
+        <a class="btn btn-primary" href="/practicas/nueva">Registrar una práctica</a>
+      </div>
+    </div>
+  {{/if}}
+</section>

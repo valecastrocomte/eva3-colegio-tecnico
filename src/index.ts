@@ -8,6 +8,7 @@ import { createDb } from './db/index.js'
 import { migrate } from './db/migrate.js'
 import { ensureBootstrapAssets } from './lib/vendor.js'
 import { createAuthRoutes } from './routes/auth.js'
+import { createPracticesRoutes } from './routes/practices.js'
 import { createAttachUser } from './middleware/auth.js'
 import { renderer } from './middleware/renderer.js'
 import type { AppConfig } from './config.js'
@@ -32,6 +33,7 @@ function createApp(config: AppConfig) {
   )
 
   app.route('/auth', createAuthRoutes(db, config))
+  app.route('/practicas', createPracticesRoutes(db))
 
   app.get('/health', (c) => {
     try {
