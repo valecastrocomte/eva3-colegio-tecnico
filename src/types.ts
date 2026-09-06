@@ -1,5 +1,5 @@
 import type { UserRole } from './schemas/auth.js'
-import type { PracticeRow } from './services/practices.js'
+import type { PracticeRow } from './repositories/practices.js'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 export type SessionUser = {

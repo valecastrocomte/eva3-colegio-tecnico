@@ -8,22 +8,17 @@ import { excerpt, toDisplayDate } from '../lib/display.js'
 import { readTextForm } from '../lib/forms.js'
 import { firstFieldErrors } from '../schemas/errors.js'
 import { createPracticeSchema } from '../schemas/practices.js'
-import type { CreatePracticeInput } from '../schemas/practices.js'
-import { listUsersByRole } from '../services/users.js'
-import { insertCompany, listCompanies } from '../services/companies.js'
-import {
-  insertDirectSupervisor,
-  listDirectSupervisors,
-} from '../services/direct-supervisors.js'
+import { listUsersByRole } from '../repositories/users.js'
+import { listCompanies } from '../repositories/companies.js'
+import { listDirectSupervisors } from '../repositories/direct-supervisors.js'
 import {
   deletePractice,
   findPracticeById,
   findPracticeDetail,
-  insertPractice,
   listPractices,
-  updatePractice,
-} from '../services/practices.js'
-import type { PracticeDetailRow, PracticeRow } from '../services/practices.js'
+} from '../repositories/practices.js'
+import type { PracticeDetailRow, PracticeRow } from '../repositories/practices.js'
+import { createPractice, updatePractice } from '../services/practices.js'
 
 export type PracticeFormValues = {
   companyMode: string
@@ -142,27 +137,6 @@ function toListView(rows: PracticeDetailRow[]) {
   }))
 }
 
-/** Resolves the company and direct supervisor ids for a validated form (create or update). */
-function resolveCompanyAndDirectSupervisor(db: DbClient, values: CreatePracticeInput) {
-  // Number() is safe here: the schema only admits existing ids for each mode.
-  const companyId =
-    values.companyMode === 'existing'
-      ? Number(values.companyId)
-      : insertCompany(db, {
-          name: values.companyName,
-          address: values.companyAddress,
-          phone: values.companyPhone,
-        })
-  const directSupervisorId =
-    values.directSupervisorMode === 'existing'
-      ? Number(values.directSupervisorId)
-      : insertDirectSupervisor(db, {
-          name: values.directSupervisorName,
-          contact: values.directSupervisorContact,
-          position: values.directSupervisorPosition,
-        })
-  return { companyId, directSupervisorId }
-}
 
 export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
   const app = new Hono<AppEnv>()
@@ -223,18 +197,7 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
     }
 
     const values = parsed.data
-    const { companyId, directSupervisorId } = resolveCompanyAndDirectSupervisor(db, values)
-
-    // The student can never pick a different owner: the account is forced server-side.
-    insertPractice(db, {
-      studentId: currentUser.role === 'estudiante' ? currentUser.id : Number(values.studentId),
-      supervisorId: Number(values.supervisorId),
-      companyId,
-      directSupervisorId,
-      startDate: values.startDate,
-      endDate: values.endDate,
-      activityDescription: values.activityDescription,
-    })
+    createPractice(db, currentUser, values)
 
     return c.redirect('/practicas')
   })
@@ -294,16 +257,7 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
     }
 
     const values = parsed.data
-    const { companyId, directSupervisorId } = resolveCompanyAndDirectSupervisor(db, values)
-    updatePractice(db, id, {
-      studentId: Number(values.studentId),
-      supervisorId: Number(values.supervisorId),
-      companyId,
-      directSupervisorId,
-      startDate: values.startDate,
-      endDate: values.endDate,
-      activityDescription: values.activityDescription,
-    })
+    updatePractice(db, id, values)
 
     return c.redirect('/practicas')
   })

@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import type { DbClient } from '../db/index.js'
-import { findCompanyById } from '../services/companies.js'
-import { findDirectSupervisorById } from '../services/direct-supervisors.js'
-import { findUserById } from '../services/users.js'
+import { findCompanyById } from '../repositories/companies.js'
+import { findDirectSupervisorById } from '../repositories/direct-supervisors.js'
+import { findUserById } from '../repositories/users.js'
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 

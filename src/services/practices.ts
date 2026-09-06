@@ -1,90 +1,87 @@
-import { aliasedTable, desc, eq } from 'drizzle-orm'
 import type { DbClient } from '../db/index.js'
-import { companies, directSupervisors, practices, users } from '../db/schema.js'
+import type { UserRole } from '../schemas/auth.js'
+import type { CreatePracticeInput } from '../schemas/practices.js'
+import { insertCompany } from '../repositories/companies.js'
+import { insertDirectSupervisor } from '../repositories/direct-supervisors.js'
+import {
+  insertPractice,
+  updatePractice as updatePracticeRow,
+} from '../repositories/practices.js'
 
-export type PracticeRow = typeof practices.$inferSelect
-export type NewPracticeRow = typeof practices.$inferInsert
+type ResolvedRelations = { companyId: number; directSupervisorId: number }
 
-/** A practice joined with its related rows (names, contact data and careers). */
-export type PracticeDetailRow = {
-  id: number
-  startDate: string
-  endDate: string
-  activityDescription: string
-  studentName: string
-  studentCareer: string | null
-  supervisorName: string
-  supervisorSpecialty: string | null
-  companyName: string
-  companyAddress: string
-  companyPhone: string
-  directSupervisorName: string
-  directSupervisorContact: string
-  directSupervisorPosition: string
-}
-
-/** Full join of practices with their student, supervisor, company and direct supervisor. */
-function practiceQuery(db: DbClient) {
-  const student = aliasedTable(users, 'estudiante')
-  const supervisor = aliasedTable(users, 'profesor')
-  return db
-    .select({
-      id: practices.id,
-      startDate: practices.startDate,
-      endDate: practices.endDate,
-      activityDescription: practices.activityDescription,
-      studentName: student.fullName,
-      studentCareer: student.career,
-      supervisorName: supervisor.fullName,
-      supervisorSpecialty: supervisor.specialty,
-      companyName: companies.name,
-      companyAddress: companies.address,
-      companyPhone: companies.phone,
-      directSupervisorName: directSupervisors.name,
-      directSupervisorContact: directSupervisors.contact,
-      directSupervisorPosition: directSupervisors.position,
-    })
-    .from(practices)
-    .innerJoin(student, eq(practices.studentId, student.id))
-    .innerJoin(supervisor, eq(practices.supervisorId, supervisor.id))
-    .innerJoin(companies, eq(practices.companyId, companies.id))
-    .innerJoin(directSupervisors, eq(practices.directSupervisorId, directSupervisors.id))
-}
-
-export function findPracticeDetail(db: DbClient, id: number): PracticeDetailRow | undefined {
-  return practiceQuery(db).where(eq(practices.id, id)).get()
-}
-
-export function listPractices(
+/**
+ * Reuses the selected company and direct supervisor, or inserts the new ones
+ * when the form mode is 'new'. Only reachable with validated input: the schema
+ * guarantees existing ids exist for 'existing' mode and required fields for
+ * 'new'.
+ */
+function resolveCompanyAndDirectSupervisor(
   db: DbClient,
-  filters: { studentId?: number } = {}
-): PracticeDetailRow[] {
-  const query = practiceQuery(db)
-  if (filters.studentId !== undefined) {
-    return query
-      .where(eq(practices.studentId, filters.studentId))
-      .orderBy(desc(practices.startDate), desc(practices.id))
-      .all()
-  }
-  return query.orderBy(desc(practices.startDate), desc(practices.id)).all()
+  values: CreatePracticeInput
+): ResolvedRelations {
+  const companyId =
+    values.companyMode === 'existing'
+      ? Number(values.companyId)
+      : insertCompany(db, {
+          name: values.companyName,
+          address: values.companyAddress,
+          phone: values.companyPhone,
+        })
+  const directSupervisorId =
+    values.directSupervisorMode === 'existing'
+      ? Number(values.directSupervisorId)
+      : insertDirectSupervisor(db, {
+          name: values.directSupervisorName,
+          contact: values.directSupervisorContact,
+          position: values.directSupervisorPosition,
+        })
+  return { companyId, directSupervisorId }
 }
 
-/** Returns the practice with the given id, or undefined when it does not exist. */
-export function findPracticeById(db: DbClient, id: number): PracticeRow | undefined {
-  return db.select().from(practices).where(eq(practices.id, id)).get()
+/**
+ * Creates a practice atomically: the company and direct supervisor inserts
+ * (when the form mode is 'new') commit together with the practice row, so a
+ * failure never leaves orphan rows. The student is always bound to their own
+ * account server-side — professors may pick any student, estudiantes never
+ * pick one.
+ */
+export function createPractice(
+  db: DbClient,
+  currentUser: { id: number; role: UserRole },
+  values: CreatePracticeInput
+): number {
+  return db.transaction((tx) => {
+    const { companyId, directSupervisorId } = resolveCompanyAndDirectSupervisor(tx, values)
+    return insertPractice(tx, {
+      studentId: currentUser.role === 'estudiante' ? currentUser.id : Number(values.studentId),
+      supervisorId: Number(values.supervisorId),
+      companyId,
+      directSupervisorId,
+      startDate: values.startDate,
+      endDate: values.endDate,
+      activityDescription: values.activityDescription,
+    })
+  })
 }
 
-/** Inserts a practice and returns the new row id. */
-export function insertPractice(db: DbClient, practice: NewPracticeRow): number {
-  return Number(db.insert(practices).values(practice).run().lastInsertRowid)
-}
-
-/** Updates the practice with the given id with the provided fields. */
-export function updatePractice(db: DbClient, id: number, values: Partial<NewPracticeRow>): void {
-  db.update(practices).set(values).where(eq(practices.id, id)).run()
-}
-
-/** Physically deletes the practice with the given id. */
-export function deletePractice(db: DbClient, id: number): void {
-  db.delete(practices).where(eq(practices.id, id)).run()
+/** Updates a practice atomically, resolving its company and direct supervisor
+ * relations inside the same transaction as the row update. */
+export function updatePractice(
+  db: DbClient,
+  id: number,
+  values: CreatePracticeInput
+): void {
+  db.transaction((tx) => {
+    const { companyId, directSupervisorId } = resolveCompanyAndDirectSupervisor(tx, values)
+    updatePracticeRow(tx, id, {
+      studentId: Number(values.studentId),
+      supervisorId: Number(values.supervisorId),
+      companyId,
+      directSupervisorId,
+      startDate: values.startDate,
+      endDate: values.endDate,
+      activityDescription: values.activityDescription,
+    })
+  })
 }

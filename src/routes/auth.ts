@@ -1,16 +1,13 @@
 import { Hono } from 'hono'
-import type { Context } from 'hono'
-import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
+import { deleteCookie, setCookie } from 'hono/cookie'
 import type { AppEnv } from '../types.js'
 import type { AppConfig } from '../config.js'
 import type { DbClient } from '../db/index.js'
-import { normalizeRut } from '../lib/rut.js'
-import { hashPassword, verifyPassword } from '../lib/password.js'
-import { createSessionToken, SESSION_COOKIE } from '../lib/session.js'
+import { SESSION_COOKIE } from '../lib/session.js'
 import { readTextForm } from '../lib/forms.js'
 import { firstFieldErrors } from '../schemas/errors.js'
 import { loginSchema, registrationSchema } from '../schemas/auth.js'
-import { findUserByRut, insertUser } from '../services/users.js'
+import { loginUser, registerUser } from '../services/auth.js'
 import { authRequired } from '../middleware/auth.js'
 
 export type RegistrationFormValues = {
@@ -79,9 +76,8 @@ export function createAuthRoutes(db: DbClient, config: AppConfig): Hono<AppEnv> 
       })
     }
 
-    const values = parsed.data
-    const normalizedRut = normalizeRut(values.rut)
-    if (!normalizedRut || findUserByRut(db, normalizedRut)) {
+    const result = await registerUser(db, parsed.data)
+    if (!result.ok) {
       return c.var.render('auth/registro', {
         title: 'Registro',
         form: rawToRegistrationValues(body),
@@ -89,20 +85,10 @@ export function createAuthRoutes(db: DbClient, config: AppConfig): Hono<AppEnv> 
       })
     }
 
-    const passwordHash = await hashPassword(values.password)
-    insertUser(db, {
-      rut: normalizedRut,
-      fullName: values.fullName,
-      passwordHash,
-      role: values.role,
-      career: values.role === 'estudiante' ? values.career : null,
-      specialty: values.role === 'profesor' ? values.specialty : null,
-    })
-
     return c.var.render('auth/registro', {
       title: 'Registro',
       success: true,
-      fullName: values.fullName,
+      fullName: result.fullName,
     })
   })
 
@@ -129,20 +115,8 @@ export function createAuthRoutes(db: DbClient, config: AppConfig): Hono<AppEnv> 
       })
     }
 
-    const values = parsed.data
-    const normalizedRut = normalizeRut(values.rut)
-    const user = normalizedRut ? findUserByRut(db, normalizedRut) : undefined
-
-    let passwordMatches = false
-    if (user) {
-      try {
-        passwordMatches = await verifyPassword(values.password, user.passwordHash)
-      } catch {
-        passwordMatches = false
-      }
-    }
-
-    if (!user || !passwordMatches) {
+    const result = await loginUser(db, parsed.data, config)
+    if (!result.ok) {
       return c.var.render('auth/login', {
         title: 'Iniciar sesión',
         form: rawToLoginValues(body),
@@ -150,12 +124,7 @@ export function createAuthRoutes(db: DbClient, config: AppConfig): Hono<AppEnv> 
       })
     }
 
-    const token = await createSessionToken(
-      { id: user.id, role: user.role, name: user.fullName },
-      config.jwtSecret,
-      config.jwtExpiresSeconds
-    )
-    setCookie(c, SESSION_COOKIE, token, {
+    setCookie(c, SESSION_COOKIE, result.token, {
       httpOnly: true,
       sameSite: 'Lax',
       path: '/',

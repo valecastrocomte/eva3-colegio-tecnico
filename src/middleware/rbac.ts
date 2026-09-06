@@ -3,7 +3,7 @@ import type { Context } from 'hono'
 import type { AppEnv } from '../types.js'
 import type { UserRole } from '../schemas/auth.js'
 import type { DbClient } from '../db/index.js'
-import { findPracticeById } from '../services/practices.js'
+import { findPracticeById } from '../repositories/practices.js'
 
 /** Renders the authorization error page with an HTTP 403 status. */
 function forbidden(c: Context<AppEnv>): Response {
