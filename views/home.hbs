@@ -28,8 +28,15 @@
       </div>
     </div>
     <div class="mt-4">
-      <a class="btn btn-primary" href="/auth/registro">Registrarse</a>
-      <a class="btn btn-outline-primary ms-2" href="/auth/login">Iniciar sesión</a>
+      {{#if currentUser}}
+        <a class="btn btn-primary" href="/practicas">
+          {{#if (eq currentUser.role "profesor")}}Ver todas las prácticas{{else}}Ir a mis prácticas{{/if}}
+        </a>
+        <a class="btn btn-outline-primary ms-2" href="/practicas/nueva">Registrar nueva práctica</a>
+      {{else}}
+        <a class="btn btn-primary" href="/auth/registro">Registrarse</a>
+        <a class="btn btn-outline-primary ms-2" href="/auth/login">Iniciar sesión</a>
+      {{/if}}
     </div>
   </div>
 </section>

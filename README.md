@@ -15,9 +15,9 @@ El alcance, el modelo de datos, las reglas de negocio y el plan de etapas están
 | 5 | RBAC y ownership (`requireRol`, `ownerOrProfesor`) | ✔ Ejecutada |
 | 6 | CRUD de prácticas: crear y listar | ✔ Ejecutada |
 | 7 | CRUD de prácticas: detalle, editar y eliminar | ✔ Ejecutada |
-| 8 | Pulido de UI y cierre | Pendiente |
+| 8 | Pulido de UI y cierre | ✔ Ejecutada |
 
-El servidor sirve la vista base (`GET /`), un healthcheck (`GET /health`), el registro y el login/logout de usuarios (`/auth/registro`, `/auth/login`, `/auth/logout`), y el CRUD completo de prácticas (`/practicas`, `/practicas/nueva`, `/practicas/:id`, editar y eliminar) con RBAC. El pulido final de UI corresponde a la etapa 8.
+El servidor sirve la vista base (`GET /`), un healthcheck (`GET /health`), el registro y el login/logout de usuarios (`/auth/registro`, `/auth/login`, `/auth/logout`), y el CRUD completo de prácticas (`/practicas`, `/practicas/nueva`, `/practicas/:id`, editar y eliminar) con RBAC. La interfaz está pulida y la navegación se adapta por rol (etapa 8).
 
 ## Stack tecnológico
 

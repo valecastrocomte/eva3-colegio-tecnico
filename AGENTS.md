@@ -14,7 +14,7 @@ Aplicación web (SSR) para administrar las prácticas profesionales de estudiant
 - Profesores supervisan **todas las prácticas** con control total (CRUD).
 - Acceso controlado por **RBAC** (rol + propiedad del registro).
 
-**Estado actual:** etapas 1–2 completadas (scaffold funcional: server Hono + Handlebars + SQLite/Drizzle + Bootstrap local; esquema Drizzle con migraciones y seed). Etapas 3–8 (auth, RBAC, CRUD, pulido UI) **pendientes** según `BRIEF.md` §16. No implementar nada fuera del orden de etapas sin indicación del usuario.
+**Estado actual:** las 8 etapas de `BRIEF.md` §16 están completadas (scaffold, esquema, auth, RBAC, CRUD y pulido de UI). El proyecto está cerrado según el alcance v1 de `BRIEF.md` §3; cualquier cambio posterior debe evaluarse contra ese alcance y las convenciones de este documento.
 
 ## 2. Stack y comandos
 

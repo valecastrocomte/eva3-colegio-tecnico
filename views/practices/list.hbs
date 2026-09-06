@@ -9,7 +9,8 @@
 
   {{#if practices}}
     <div class="table-responsive">
-      <table class="table table-hover align-middle">
+      <table class="table table-hover table-striped align-middle">
+        <caption class="visually-hidden">Listado de prácticas profesionales</caption>
         <thead>
           <tr>
             <th scope="col">Estudiante</th>
@@ -31,7 +32,7 @@
               <td>{{supervisorName}}</td>
               <td class="text-nowrap">{{startDate}}</td>
               <td class="text-nowrap">{{endDate}}</td>
-              <td class="text-body-secondary">{{activityDescription}}</td>
+              <td class="text-body-secondary text-truncate" style="max-width: 16rem">{{activityDescription}}</td>
               <td class="text-end text-nowrap">
                 <a class="btn btn-sm btn-outline-primary" href="/practicas/{{id}}">Ver</a>
                 {{#if (eq @root.currentUser.role "profesor")}}

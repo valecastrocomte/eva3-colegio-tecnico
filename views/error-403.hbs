@@ -1,9 +1,19 @@
-<section class="card border-0 shadow-sm">
-  <div class="card-body p-4 p-md-5">
-    <h1 class="fs-4 mb-3">403 · Acceso denegado</h1>
-    <p class="text-body-secondary mb-4">
-      No tienes permisos para realizar esta acción ni para ver esta práctica.
-    </p>
-    <a class="btn btn-primary" href="/">Volver al inicio</a>
+<section class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card border-0 shadow-sm text-center">
+      <div class="card-body p-4 p-md-5">
+        <h1 class="display-1 fw-bold text-primary mb-2">403</h1>
+        <h2 class="fs-4 mb-3">Acceso denegado</h2>
+        <p class="text-body-secondary mb-4">
+          No tienes permisos para realizar esta acción ni para ver esta práctica. Si crees que es un
+          error, contacta a tu profesor supervisor.
+        </p>
+        <a class="btn btn-primary" href="/">Volver al inicio</a>
+        {{#if currentUser}}
+          <a class="btn btn-outline-primary ms-2" href="/practicas">
+            {{#if (eq currentUser.role "profesor")}}Ver todas las prácticas{{else}}Ir a mis prácticas{{/if}}
+          </a>
+        {{/if}}
+    </div>
   </div>
 </section>
