@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { sql } from 'drizzle-orm'
 import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
 import type { AppEnv } from './types.js'
@@ -24,6 +25,16 @@ function createApp() {
       title: 'Gestión de Prácticas Profesionales',
     })
   )
+
+  app.get('/health', (c) => {
+    try {
+      db.run(sql`select 1`)
+      return c.json({ status: 'ok', db: 'connected' })
+    } catch (error) {
+      console.error('[db] fallo de conexión:', error)
+      return c.json({ status: 'error', db: 'disconnected' }, 503)
+    }
+  })
 
   return app
 }
