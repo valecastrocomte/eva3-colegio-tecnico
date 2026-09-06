@@ -195,7 +195,6 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
       errors: {},
       options: loadFormOptions(db),
       submitLabel: 'Guardar práctica',
-      cancelUrl: '/practicas',
       showBackButton: true,
     })
   })
@@ -217,7 +216,6 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
         errors: firstFieldErrors(parsed.error),
         options: loadFormOptions(db),
         submitLabel: 'Guardar práctica',
-        cancelUrl: '/practicas',
         showBackButton: true,
       })
     }
@@ -268,7 +266,6 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
       errors: {},
       options: loadFormOptions(db),
       submitLabel: 'Guardar cambios',
-      cancelUrl: `/practicas/${practice.id}`,
     })
   })
 
@@ -289,7 +286,6 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
         errors: firstFieldErrors(parsed.error),
         options: loadFormOptions(db),
         submitLabel: 'Guardar cambios',
-        cancelUrl: `/practicas/${id}`,
       })
     }
 
@@ -305,7 +301,7 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
       activityDescription: values.activityDescription,
     })
 
-    return c.redirect(`/practicas/${id}`)
+    return c.redirect('/practicas')
   })
 
   app.post('/:id/eliminar', requireRol('profesor'), (c) => {
