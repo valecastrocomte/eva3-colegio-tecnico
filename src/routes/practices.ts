@@ -191,6 +191,7 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
 
     return c.var.render('practices/nueva', {
       title: 'Nueva práctica',
+      formAction: '/practicas',
       form: EMPTY_FORM,
       errors: {},
       options: loadFormOptions(db),
@@ -212,6 +213,7 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
     if (!parsed.success) {
       return c.var.render('practices/nueva', {
         title: 'Nueva práctica',
+        formAction: '/practicas',
         form: rawToFormValues(body),
         errors: firstFieldErrors(parsed.error),
         options: loadFormOptions(db),
@@ -262,6 +264,7 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
     return c.var.render('practices/editar', {
       title: 'Editar práctica',
       practiceId: practice.id,
+      formAction: `/practicas/${practice.id}`,
       form: practiceToFormValues(practice),
       errors: {},
       options: loadFormOptions(db),
@@ -282,6 +285,7 @@ export function createPracticesRoutes(db: DbClient): Hono<AppEnv> {
       return c.var.render('practices/editar', {
         title: 'Editar práctica',
         practiceId: id,
+        formAction: `/practicas/${id}`,
         form: rawToFormValues(body),
         errors: firstFieldErrors(parsed.error),
         options: loadFormOptions(db),

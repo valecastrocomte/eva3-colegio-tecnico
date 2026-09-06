@@ -44,6 +44,8 @@
                 {{#if (eq currentUser.role "profesor")}}Prof. {{/if}}{{currentUser.name}}
               </span>
               <form method="post" action="/auth/logout" class="mb-0">
+                <button type="submit" class="btn btn-sm btn-outline-light">Salir</button>
+              </form>
             {{else}}
               <a class="btn btn-sm btn-outline-light" href="/auth/login">Iniciar sesión</a>
             {{/if}}
