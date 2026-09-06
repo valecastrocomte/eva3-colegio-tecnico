@@ -14,7 +14,7 @@ Aplicación web (SSR) para administrar las prácticas profesionales de estudiant
 - Profesores supervisan **todas las prácticas** con control total (CRUD).
 - Acceso controlado por **RBAC** (rol + propiedad del registro).
 
-**Estado actual:** etapa 1 completada (scaffold funcional: server Hono + Handlebars + SQLite/Drizzle + Bootstrap local). Etapas 2–8 (esquema, auth, RBAC, CRUD, pulido UI) **pendientes** según `BRIEF.md` §16. No implementar nada fuera del orden de etapas sin indicación del usuario.
+**Estado actual:** etapas 1–2 completadas (scaffold funcional: server Hono + Handlebars + SQLite/Drizzle + Bootstrap local; esquema Drizzle con migraciones y seed). Etapas 3–8 (auth, RBAC, CRUD, pulido UI) **pendientes** según `BRIEF.md` §16. No implementar nada fuera del orden de etapas sin indicación del usuario.
 
 ## 2. Stack y comandos
 
@@ -29,11 +29,14 @@ Aplicación web (SSR) para administrar las prácticas profesionales de estudiant
 | Runtime | Node ≥ 20 (engines), `type: module`, TypeScript estricto |
 
 ```bash
-npm install        # instalar dependencias
-npm run dev        # servidor con recarga (tsx watch, lee .env si existe)
-npm run typecheck  # tsc --noEmit — SIEMPRE debe pasar antes de terminar
-npm run build      # tsc → dist/
-npm run start      # node dist/index.js (requiere build previo)
+npm install          # instalar dependencias
+npm run dev          # servidor con recarga (tsx watch, lee .env si existe)
+npm run typecheck    # tsc --noEmit — SIEMPRE debe pasar antes de terminar
+npm run build        # tsc → dist/
+npm run start        # node dist/index.js (requiere build previo)
+npm run db:generate  # drizzle-kit generate: migraciones desde src/db/schema.ts → drizzle/
+npm run db:migrate   # drizzle-kit migrate: aplica migraciones pendientes a la base
+npm run db:seed      # tsx src/db/seed.ts: carga datos mínimos de desarrollo
 ```
 
 Verificación rápida de que la app vive:
@@ -57,6 +60,10 @@ src/
     vendor.ts           # ensureBootstrapAssets(): copia node_modules/bootstrap/dist → public/vendor
   db/
     index.ts            # createDb(): abre SQLite, pragmas WAL + foreign_keys=ON, devuelve drizzle
+    schema.ts           # Tablas Drizzle: usuarios, empresas, jefes_directos, practicas (FKs y CHECK de fechas)
+    migrate.ts          # migrate(db): aplica las migraciones de drizzle/ (se ejecuta al arrancar)
+    seed.ts             # Seed de desarrollo: 2 estudiantes, 2 profesores, 1 empresa, 1 jefe directo (npm run db:seed)
+drizzle/                # Migraciones SQL generadas con drizzle-kit (commiteadas)
 views/
   home.hbs              # Vista única actual
   layouts/main.hbs      # Layout base: lang="es-CL", navbar, footer, {{{body}}}
@@ -68,7 +75,7 @@ public/vendor/          # Bootstrap copiado en runtime (gitignored)
 
 - **`ensureBootstrapAssets()`** se ejecuta al arrancar: si `public/vendor/bootstrap` no existe, copia el `dist` de Bootstrap desde `node_modules`. No subas esos assets a git (`.gitignore` los excluye); se regeneran solos.
 - **Vistas:** cada vista `.hbs` se renderiza dentro de `views/layouts/main.hbs` — los datos de la vista llegan con `body` ya renderizado. El layout tiene `lang="es-CL"` y consume Bootstrap desde `/assets/vendor/bootstrap/...` (mapeado a `public/` por `serveStatic`).
-- **DB:** `createDb()` abre `DATABASE_PATH` (default `./data/app.db`), crea el directorio si falta, fuerza `journal_mode = WAL` y `foreign_keys = ON`. En la etapa actual **no hay esquema ni migraciones Drizzle todavía** (etapa 2 pendiente); `health` valida la conexión con `select 1`.
+- **DB:** `createDb()` abre `DATABASE_PATH` (default `./data/app.db`), crea el directorio si falta, fuerza `journal_mode = WAL` y `foreign_keys = ON`. Al arrancar se aplican las migraciones de `drizzle/` vía `migrate()` (idempotente; registra en `__drizzle_migrations`). `npm run db:seed` recarga los datos mínimos de desarrollo; `health` valida la conexión con `select 1`. En inserts de Drizzle, encadenar `.run()`/`.all()` para ejecutar — `.values()` solo construye la query.
 - **Config:** `PORT` y `DATABASE_PATH` vienen de `.env` (opcional; hay defaults). Las rutas de proyecto se resuelven desde `import.meta.url` para que dev (`src/`) y build (`dist/`) apunten al mismo `views/` y `public/`.
 - **`db` en `index.ts` es una constante de módulo** declarada después de `createApp` pero usada por el handler de `/health` vía closure: funciona porque el handler corre después de la inicialización. Al refactorizar, mantén la inicialización antes de servir.
 

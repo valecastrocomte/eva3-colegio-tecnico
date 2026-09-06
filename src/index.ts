@@ -5,6 +5,7 @@ import { serveStatic } from '@hono/node-server/serve-static'
 import type { AppEnv } from './types.js'
 import { loadConfig, publicDir } from './config.js'
 import { createDb } from './db/index.js'
+import { migrate } from './db/migrate.js'
 import { ensureBootstrapAssets } from './lib/vendor.js'
 import { renderer } from './middleware/renderer.js'
 
@@ -43,6 +44,7 @@ const config = loadConfig()
 ensureBootstrapAssets()
 
 const db = createDb(config.databasePath)
+migrate(db)
 console.log(`[db] SQLite en ${config.databasePath}`)
 
 const app = createApp()
