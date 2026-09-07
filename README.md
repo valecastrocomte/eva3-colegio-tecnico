@@ -40,10 +40,12 @@ El servidor sirve la vista base (`GET /`), un healthcheck (`GET /health`), el re
 ## Puesta en marcha
 
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/valecastrocomte/eva3-colegio-tecnico
 cd eva3-colegio-tecnico
 npm install
-cp .env.example .env   # opcional: los valores por defecto funcionan sin .env
+cp .env.example .env      # opcional: los valores por defecto funcionan sin .env
+npm run db:migrate        # aplicación del esquema (obligatorio la primera vez)
+npm run db:seed           # datos demo opcionales (acceso con clave1234)
 npm run dev
 ```
 
@@ -65,7 +67,9 @@ Variables de entorno (`.env`):
 | `npm run dev` | Servidor de desarrollo con recarga en caliente |
 | `npm run typecheck` | Verificación de tipos (`tsc --noEmit`) |
 | `npm run build` | Compilación TypeScript a `dist/` |
-| `npm run start` | Ejecutar el build compilado (`node dist/index.js`) |
+| `npm run db:migrate` | Aplica las migraciones pendientes (`drizzle-kit migrate`); obligatorio en una BD nueva |
+| `npm run db:generate` | Genera una migración Drizzle a partir de `src/db/schema.ts` |
+| `npm run start` | Ejecutar el build compilado (`node --env-file-if-exists=.env dist/index.js`) |
 | `npm run db:seed` | Regenera los datos base (usuarios demo, empresa y jefe directo) |
 
 Los usuarios demo creados por `npm run db:seed` usan la contraseña `clave1234` y su `password_hash` se genera con Argon2id.
@@ -123,7 +127,7 @@ Drizzle ORM ── SQLite (WAL)
 
 - **Vistas SSR:** cada template se renderiza dentro de `views/layouts/main.hbs`; la vista recibe `body` ya renderizado.
 - **Estáticos:** `/assets/*` se sirve desde `public/`; al arrancar, `ensureBootstrapAssets()` copia Bootstrap desde `node_modules` si `public/vendor/bootstrap` no existe (sin CDN, funcional offline).
-- **Base de datos:** se crea automáticamente en `data/` con `journal_mode = WAL` y `foreign_keys = ON`.
+- **Base de datos:** el archivo se crea automáticamente en `data/` (WAL, `foreign_keys = ON`); el esquema se aplica con `npm run db:migrate`.
 
 ## Modelo de permisos (target)
 
@@ -143,4 +147,4 @@ Detalle de entidades (`usuarios`, `empresas`, `jefes_directos`, `practicas`), ru
 - **TypeScript funcional** sin clases: funciones puras y pequeñas, composición, datos inmutables.
 - **Capas:** rutas → servicios → repositorios → DB → vistas; cero duplicación y cero `TODO`.
 - **Validación de entrada siempre en servidor** (Zod).
-- Ver más en [`AGENTS.md`](./AGENTS.md) — reglas verificables en revisión de código.
+- Ver más en [`AGENTS.md`](./AGENTS.md) — reglas verificables en revisión de código..
